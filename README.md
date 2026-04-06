@@ -1,4 +1,4 @@
-# 🚀 DevOps CI/CD Pipeline with GitHub Actions & AWS EC2
+DevOps CI/CD Pipeline with GitHub Actions & AWS EC2
 
 ## 📌 Project Overview
 
