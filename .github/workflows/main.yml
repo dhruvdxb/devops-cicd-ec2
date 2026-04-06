@@ -15,23 +15,35 @@ jobs:
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v0.1.5
       with:
-        host: 3.228.25.62
+        host: ${{ secrets.EC2_HOST }}
         username: ec2-user
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd /home/ec2-user
 
-          if [ ! -d "AWS-DevOps-agent" ]; then
-            git clone https://github.com/dhruvdxb/AWS-DevOps-agent.git
+          # Clone repo if not exists, else pull latest code
+          if [ ! -d "devops-cicd-ec2" ]; then
+            git clone https://github.com/dhruvdxb/devops-cicd-ec2.git
           else
-            cd AWS-DevOps-agent && git pull
+            cd devops-cicd-ec2 && git pull
           fi
 
-          cd AWS-DevOps-agent
+          cd devops-cicd-ec2
 
+          # Ensure web directory exists
           sudo mkdir -p /var/www/html
+
+          # Copy latest app files
           sudo cp index.html /var/www/html/index.html
 
-          sudo yum install -y httpd
-          sudo systemctl start httpd
+          # Install Apache only if not installed
+          if ! command -v httpd &> /dev/null; then
+            sudo yum install -y httpd
+          fi
+
+          # Restart and enable Apache
+          sudo systemctl restart httpd
           sudo systemctl enable httpd
+
+          # Deployment log
+          echo "Deployment successful at $(date)" >> /home/ec2-user/deploy.log
